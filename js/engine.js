@@ -12,6 +12,7 @@
  * This engine makes the canvas' context (ctx) object globally available to make 
  * writing app.js a little simpler to work with.
  */
+'use strict';
 
 var Engine = (function(global) {
     /* Predefine the variables we'll be using within this scope,
@@ -22,9 +23,7 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime,
-        score = 0,
-        hearts = 3;
+        lastTime;
 
     canvas.width = 505;
     canvas.height = 606;
@@ -81,29 +80,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        checkCollisions();
-    }
-
-    function checkCollisions() {
-        let collision = false;
-        for(let enemy of allEnemies) {
-            let cover =  player.x < enemy.x + 55 && player.x > enemy.x - 55;
-            if(enemy.y === player.y && cover) {
-                player.x = 202;
-                player.y = 415;
-                collision = true;
-                allEnemies = [];
-                createEnemies();
-                --hearts;
-                if(hearts == 0) {
-                    alert("Game Over");
-                    hearts = 3;
-                    score = 0;
-                }
-                return;
-            }
-        }
-
+        player.checkCollision();
     }
 
 
@@ -119,11 +96,6 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
-        if(player.y == 0) {
-            player.x = 202;
-            player.y = 415;
-            score += 1000;
-        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -149,7 +121,7 @@ var Engine = (function(global) {
             row, col;
         
         // Before drawing, clear existing canvas
-        ctx.clearRect(0,0,canvas.width,canvas.height)
+        ctx.clearRect(0,0,canvas.width,canvas.height);
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
@@ -168,11 +140,11 @@ var Engine = (function(global) {
             }
         }
 
-        ctx.fillText("Score: " + score, 20, 100);
+        ctx.fillText("Score: " + player.score, 20, 100);
         ctx.font = "30px Comix Sans MS";
         ctx.fillStyle = "yellow";
         ctx.drawImage(Resources.get('images/Heart.png'), 20, 540, 30, 50);
-        ctx.fillText("x " + hearts, 60, 577);
+        ctx.fillText("x " + player.hearts, 60, 577);
         renderEntities();
     }
 

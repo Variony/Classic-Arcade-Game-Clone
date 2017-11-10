@@ -1,5 +1,7 @@
 // Enemies our player must avoid
-var Enemy = function(y, speed) {
+'use strict';
+
+let Enemy = function(y, speed) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
@@ -36,14 +38,22 @@ let Player = function() {
     this.sprite = 'images/char-boy.png';
     this.x = 202;
     this.y = 415;
-}
+    this.score = 0;
+    this.hearts = 3;
+};
 
 Player.prototype.update= function() {
-}
+    if(this.y === 0) {
+        this.x = 202;
+        this.y = 415;
+        this.score += 1000;
+    }
+
+};
 
 Player.prototype.render= function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
+};
 
 Player.prototype.handleInput = function(key) {
     switch(key) {
@@ -70,7 +80,31 @@ Player.prototype.handleInput = function(key) {
             break;
     }
 
-}
+};
+
+
+Player.prototype.checkCollision = function() {
+
+    let collision = false;
+    for(let enemy of allEnemies) {
+        let cover =  this.x < enemy.x + 55 && this.x > enemy.x - 55;
+        if(enemy.y === this.y && cover) {
+            this.x = 202;
+            this.y = 415;
+            collision = true;
+            allEnemies = [];
+            createEnemies();
+            -- this.hearts;
+            if(this.hearts === 0) {
+                alert("Game Over");
+                this.hearts = 3;
+                this.score = 0;
+            }
+            return;
+        }
+    }
+};
+
 
 let player = new Player();
 
@@ -93,7 +127,7 @@ createEnemies();
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
+    const allowedKeys = {
         37: 'left',
         38: 'up',
         39: 'right',
